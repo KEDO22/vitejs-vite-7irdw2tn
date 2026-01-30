@@ -58,7 +58,7 @@ export default function WorldMap({ onSelectAction, unlockedLocations }: Props) {
             `}
             style={{ left: `${loc.x}%`, top: `${loc.y}%` }}
           >
-            {/* Indicatore "Tu sei qui" potrebbe essere aggiunto qui in futuro */}
+            {/* Indicatore "Tu sei qui" */}
             {isUnlocked && <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>}
             
             {/* Tooltip Hover */}
