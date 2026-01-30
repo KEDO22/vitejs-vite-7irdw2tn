@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MapLocation } from './types';
+import { useState } from 'react';
+import type { MapLocation } from './types';
 import { mapLocations } from './mapData';
 
 interface Props {

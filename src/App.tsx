@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { GameState, Choice, Consequence } from './types';
+import { useState } from 'react';
+import type { GameState, Choice, Consequence, ResourceKeys, ReputationKeys } from './types';
 import { storyNodes } from './storyData';
 import WorldMap from './WorldMap';
 import './index.css';
@@ -10,7 +10,7 @@ const initialState: GameState = {
   resources: { gold: 10, resonance: 0 },
   reputation: { empire: 0, dominion: 0, freeLands: 0 },
   flags: {},
-  unlockedLocations: ['ruins_start', 'orynth'] // Luoghi iniziali visibili
+  unlockedLocations: ['ruins_start', 'orynth']
 };
 
 type Screen = 'STORY' | 'MAP';
@@ -22,31 +22,47 @@ export default function App() {
 
   const currentNode = storyNodes[currentNodeId];
 
-  // Gestione click su una scelta narrativa
   const handleChoice = (choice: Choice) => {
     // 1. Applica Conseguenze
     if (choice.consequences) {
       const newState = { ...gameState };
+      // Copie profonde per evitare mutazioni
+      newState.resources = { ...gameState.resources };
+      newState.reputation = { ...gameState.reputation };
+      newState.flags = { ...gameState.flags };
+      newState.player = { ...gameState.player, inventory: [...gameState.player.inventory] };
+      newState.unlockedLocations = [...gameState.unlockedLocations];
       
       choice.consequences.forEach((cons: Consequence) => {
-        if (cons.type === 'MODIFY_RESOURCE') {
-          // @ts-ignore
-          newState.resources[cons.target] += (cons.value as number);
-        }
-        else if (cons.type === 'MODIFY_REPUTATION') {
-           // @ts-ignore
-          newState.reputation[cons.target] += (cons.value as number);
-        }
-        else if (cons.type === 'SET_FLAG') {
-          newState.flags[cons.target] = (cons.value as boolean);
-        }
-        else if (cons.type === 'ADD_ITEM') {
-            newState.player.inventory.push(cons.value as string);
-        }
-        else if (cons.type === 'UNLOCK_LOCATION') {
-            if (!newState.unlockedLocations.includes(cons.value as string)) {
-                newState.unlockedLocations.push(cons.value as string);
+        switch (cons.type) {
+          case 'MODIFY_RESOURCE':
+            if (cons.target in newState.resources) {
+                const key = cons.target as ResourceKeys;
+                newState.resources[key] += (cons.value as number);
             }
+            break;
+            
+          case 'MODIFY_REPUTATION':
+            if (cons.target in newState.reputation) {
+                const key = cons.target as ReputationKeys;
+                newState.reputation[key] += (cons.value as number);
+            }
+            break;
+
+          case 'SET_FLAG':
+            newState.flags[cons.target] = (cons.value as boolean);
+            break;
+
+          case 'ADD_ITEM':
+            newState.player.inventory.push(cons.value as string);
+            break;
+
+          case 'UNLOCK_LOCATION':
+            const locId = cons.value as string;
+            if (!newState.unlockedLocations.includes(locId)) {
+                newState.unlockedLocations.push(locId);
+            }
+            break;
         }
       });
       setGameState(newState);
@@ -57,13 +73,10 @@ export default function App() {
       setScreen('MAP');
     } else if (choice.nextNodeId) {
       setCurrentNodeId(choice.nextNodeId);
-      // Se è un nodo normale, rimaniamo su STORY, non serve cambiare screen
     }
   };
 
-  // Callback quando si sceglie un'azione dalla Mappa
   const handleMapAction = (storyNodeId: string) => {
-    // Se il nodo esiste nel database
     if (storyNodes[storyNodeId]) {
         setCurrentNodeId(storyNodeId);
         setScreen('STORY');
@@ -75,10 +88,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans p-4 flex flex-col items-center">
       
-      {/* --- HUD (HEAD UP DISPLAY) --- */}
+      {/* --- HUD --- */}
       <div className="w-full max-w-4xl bg-gray-900/90 backdrop-blur p-4 rounded-lg mb-6 flex flex-wrap justify-between items-center border border-gray-800 shadow-lg gap-4">
-        
-        {/* Statistiche Personaggio */}
         <div className="flex items-center gap-6">
             <div className="flex flex-col">
                 <span className="text-xs text-gray-500 uppercase font-bold">Nome</span>
@@ -99,7 +110,6 @@ export default function App() {
             </div>
         </div>
 
-        {/* Reputazione */}
         <div className="flex gap-3 text-sm">
             <div className="px-3 py-1 rounded bg-gray-800 border border-gray-600 text-gray-300">
                 Impero: {gameState.reputation.empire}
@@ -110,10 +120,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* --- AREA DI GIOCO PRINCIPALE --- */}
+      {/* --- AREA DI GIOCO --- */}
       <div className="w-full max-w-4xl transition-all duration-500 ease-in-out">
         
-        {/* VISTA MAPPA */}
         {screen === 'MAP' && (
            <WorldMap 
              onSelectAction={handleMapAction} 
@@ -121,21 +130,15 @@ export default function App() {
            />
         )}
 
-        {/* VISTA STORIA */}
         {screen === 'STORY' && currentNode && (
           <div className="bg-black/80 border border-gray-700 p-8 rounded-xl shadow-2xl backdrop-blur-md relative overflow-hidden">
-             
-             {/* Elemento decorativo */}
              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-transparent"></div>
-
             <h1 className="text-3xl md:text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-300 font-serif">
                 {currentNode.title}
             </h1>
-            
             <div className="text-lg md:text-xl leading-relaxed mb-10 text-gray-300 font-light">
               {currentNode.text}
             </div>
-
             <div className="grid grid-cols-1 gap-4">
               {currentNode.choices.map((choice) => (
                 <button
@@ -153,12 +156,10 @@ export default function App() {
           </div>
         )}
 
-        {/* ERRORE (Se nodo non trovato) */}
         {screen === 'STORY' && !currentNode && (
             <div className="text-center text-red-500 p-10 bg-gray-900 rounded">
                 Errore Critico: Nodo narrativo "{currentNodeId}" non trovato.
-                <br/>
-                <button onClick={() => setScreen('MAP')} className="mt-4 underline">Torna alla Mappa</button>
+                <button onClick={() => setScreen('MAP')} className="block mt-4 text-blue-400 underline mx-auto">Torna alla Mappa</button>
             </div>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { MapLocation } from './types';
+import type { MapLocation } from './types';
 
 export const mapLocations: MapLocation[] = [
   {
@@ -8,7 +8,7 @@ export const mapLocations: MapLocation[] = [
     x: 45,
     y: 75,
     region: 'FREELANDS',
-    status: 'VISITED', // Inizia come già visitato
+    status: 'VISITED',
     actions: [
       { id: 'act_explore_ruins', label: 'Cerca tra le macerie', storyNodeId: 'ruins_scavenge' }
     ]
@@ -20,7 +20,7 @@ export const mapLocations: MapLocation[] = [
     x: 50,
     y: 60,
     region: 'FREELANDS',
-    status: 'UNLOCKED', // Sbloccato dall'inizio per questo esempio
+    status: 'UNLOCKED', 
     actions: [
       { id: 'act_market', label: 'Vai al Mercato Nero', storyNodeId: 'market_intro' },
       { id: 'act_tavern', label: 'Taverna "Il Drago Cieco"', storyNodeId: 'tavern_intro' }
@@ -33,7 +33,7 @@ export const mapLocations: MapLocation[] = [
     x: 20,
     y: 40,
     region: 'EMPIRE',
-    status: 'LOCKED', // Bloccato all'inizio
+    status: 'LOCKED',
     actions: [
       { id: 'act_gate', label: 'Avvicinati al Cancello', storyNodeId: 'bastion_gate' }
     ]

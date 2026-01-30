@@ -1,4 +1,4 @@
-import { StoryNode } from './types';
+import type { StoryNode } from './types';
 
 export const storyNodes: Record<string, StoryNode> = {
   // --- INTRODUZIONE ---
@@ -25,7 +25,7 @@ export const storyNodes: Record<string, StoryNode> = {
       {
         id: 'c_map',
         text: 'Apri la Mappa del Mondo',
-        nextNodeId: 'MAP' // QUESTA SCELTA APRE LA MAPPA
+        nextNodeId: 'MAP'
       }
     ]
   },
@@ -39,7 +39,7 @@ export const storyNodes: Record<string, StoryNode> = {
       {
         id: 'c_buy_food',
         text: 'Compra provviste (5 Oro)',
-        nextNodeId: 'MAP', // Torna alla mappa dopo l'azione
+        nextNodeId: 'MAP',
         consequences: [{ type: 'MODIFY_RESOURCE', target: 'gold', value: -5 }]
       },
       {
